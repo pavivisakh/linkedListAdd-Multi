@@ -1,1 +1,168 @@
 
+
+/*
+ * 
+ *	IMPLEMENTATION OF SPARSE MATRIX USING ARRAY. 
+ * 
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+//structure to hold information of sparse matrix.
+typedef struct{
+
+	int **matrix;
+	int row;
+	int col;
+	
+}SparseMatrix;
+
+
+//function prototypes.
+int ** allocate_memory_for_matrix(int row, int col);//allocates memory for matrix.
+void input_matrix_elements(int row, int col, int **matrix);//input elements into matrix.
+SparseMatrix to_sparse_matrix(int row, int col, int **matrix);//create sparse matrix from passed matrix.
+void delete_matrix(int row, int col, int **matrix);//delete matrix and free space.
+
+
+int main(){
+	
+	
+	int **matrix = NULL;
+	int matrix_row, matrix_col;
+	SparseMatrix sparse_matrix;
+	
+	
+	printf("Enter how many rows in matrix : ");
+	scanf("%d", &matrix_row);
+	
+	
+	printf("Enter how many columns in matrix : ");
+	scanf("%d", &matrix_col);
+	
+	
+	printf("Enter matrix elements : \n");
+	matrix = allocate_memory_for_matrix(matrix_row, matrix_col);
+	input_matrix_elements(matrix_row, matrix_col, matrix);
+	
+	
+	printf("\nMatrix elements : \n");
+	for(int i = 0; i < matrix_row; i++){
+		
+		for(int j = 0; j < matrix_col; j++)
+			printf("%-4d\t", matrix[i][j]);
+			
+		putchar('\n');
+	}
+	
+	
+	sparse_matrix = to_sparse_matrix(matrix_row, matrix_col, matrix);
+	
+	
+	printf("\nSparse Matrix : \n");
+	//printf("Row\tColumn\tValue\t\n");
+	printf("%-8s%-8s%-8s\n", "Row", "Column", "Value");
+	for(int i = 0; i < sparse_matrix.row; i++){
+		
+		for(int j = 0; j < sparse_matrix.col; j++)
+			printf("%-8d", sparse_matrix.matrix[i][j]);
+			
+		putchar('\n');
+	}
+	
+	//deleting matrices.
+	delete_matrix(matrix_row, matrix_col, matrix);
+	delete_matrix(sparse_matrix.row, sparse_matrix.col, sparse_matrix.matrix);
+	
+	return EXIT_SUCCESS;
+	
+}
+
+
+//function to allocate memory for matrix.
+//matrix is returned.
+int** allocate_memory_for_matrix(int row, int col){
+	
+	int **matrix = (int**) calloc(row, sizeof(int*));
+	
+	if(matrix == NULL){
+	
+		printf("Failed to allocate memory :(\n");
+		printf("CLOSING PROGRAM!\n");
+		exit(EXIT_FAILURE);
+		
+	}else{
+		
+		for(int i = 0; i < row; i++){
+			
+			matrix[i] = (int*) calloc(col, sizeof(int));
+			if(matrix[i] == NULL){
+			
+				printf("Failed to allocate memory :(\n");
+				printf("CLOSING PROGRAM!\n");
+				exit(EXIT_FAILURE);
+					
+			}
+			
+		}
+		
+	}
+	
+	return matrix;
+	
+}
+
+//function to input data into matrix.
+void input_matrix_elements(int row, int col, int **matrix){
+	
+	for(int i = 0; i < row; i++)
+		for(int j = 0; j < col; j++)
+			scanf("%d", &matrix[i][j]);
+		
+}
+
+
+//main function to convert matrix into sparse matrix.
+SparseMatrix to_sparse_matrix(int row, int col, int **matrix){
+	
+	int nonzero_elements = 0; 
+	int i, j, sparse_row = 0;
+	SparseMatrix sparse_matrix;
+	
+	for(i = 0; i < row; i++)
+		for(j = 0; j < col; j++)
+			if(matrix[i][j] != 0)
+				nonzero_elements++;
+	
+	
+	sparse_matrix.matrix = allocate_memory_for_matrix(nonzero_elements, 3);
+	sparse_matrix.row = nonzero_elements;
+	sparse_matrix.col = 3;
+	
+	for(i = 0; i < row; i++)
+		for(j = 0; j < col; j++)
+			if(matrix[i][j] != 0){
+			
+				sparse_matrix.matrix [sparse_row][0] = i;
+				sparse_matrix.matrix [sparse_row][1] = j;
+				sparse_matrix.matrix [sparse_row][2] = matrix[i][j];
+				
+				sparse_row++;
+				
+			}
+			
+	return sparse_matrix;
+	
+}
+
+//function to delete matrix.
+void delete_matrix(int row, int col, int **matrix){
+
+
+	for(int i = 0; i < row; i++)
+		free(matrix[i]);
+	
+	free(matrix);
+	
+}
